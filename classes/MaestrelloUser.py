@@ -38,7 +38,7 @@ class MaestrelloUser(MaestrelloBasic):
         :param (не обязательный) country: символьный код страны
 
         :return:
-        В случае успеха:
+        В случае успеха возвращает список адресов пользователя:
         {
             "success": true,
             "address": [
@@ -65,7 +65,8 @@ class MaestrelloUser(MaestrelloBasic):
                         "country": "rus"
                     },
                     "ext": "shipping"
-                }
+                },
+                ...
             ]
         }
         """
@@ -143,7 +144,7 @@ class MaestrelloUser(MaestrelloBasic):
         :param address_id: ID адреса
 
         :return:
-        В случае успеха возвращает доступные адреса:
+        В случае успеха возвращает список адресов пользователя:
         {
             "success": true,
             "address": [
@@ -159,6 +160,7 @@ class MaestrelloUser(MaestrelloBasic):
                     },
                     "ext": "shipping"
                 },
+                ...
             ]
         }
         """
