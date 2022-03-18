@@ -380,6 +380,33 @@ class MaestrelloUser(MaestrelloBasic):
         response = requests.post(url=api_url, headers=self.headers, json=data)
         return self.__validate(response=response, params=data)
 
+    def registration_guest(self, order_id: int):
+        """
+        Создание пользователя после гостевого заказа
+
+        GET https://pizzamaestrello.com/api.php/p/v1/join?
+            id=21799
+
+        :param order_id: ID заказа
+
+        :return:
+        {
+            "password": "urOSSVggAdG",
+            "logins": [
+                "a.volkov@maestrello.com",
+                "79299082303"
+            ]
+        }
+        """
+
+        api_url = f'{self.api}join'
+        params = {
+            "id": order_id,
+        }
+
+        response = requests.get(url=api_url, headers=self.headers, params=params)
+        return self.__validate(response=response, params=params)
+
     def update_address(self, token: str, address_id: int, city: str = "",
                        street: str = "", house_number: str = "", flat: str = "",
                        entrance: str = "", region: str = "", country: str = "rus"):
@@ -548,3 +575,4 @@ class MaestrelloUser(MaestrelloBasic):
 
         response = requests.post(url=api_url, headers=self.headers, params=params, json=data)
         return self.__validate(response=response, params={"params": params, "json": data})
+
