@@ -12,7 +12,7 @@ class MaestrelloBasic:
     def __init__(self):
         pass
 
-    def __validate(self, response, params):
+    def _validate(self, response, params):
         if response.status_code == 200:
             return response.json()
 
