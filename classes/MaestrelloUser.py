@@ -92,7 +92,7 @@ class MaestrelloUser(MaestrelloBasic):
         ]
 
         response = requests.post(url=api_url, headers=self.headers, params=params, json=data)
-        return self.__validate(response=response, params={"params": params, "json": data})
+        return self._validate(response=response, params={"params": params, "json": data})
 
     def auth(self, login: str, password: str):
         """
@@ -130,7 +130,7 @@ class MaestrelloUser(MaestrelloBasic):
         }
 
         response = requests.get(url=api_url, headers=self.headers, params=params)
-        return self.__validate(response=response, params=params)
+        return self._validate(response=response, params=params)
 
     def delete_address(self, token: str, address_id: int):
         """
@@ -172,7 +172,7 @@ class MaestrelloUser(MaestrelloBasic):
         }
 
         response = requests.get(url=api_url, headers=self.headers, params=params)
-        return self.__validate(response=response, params=params)
+        return self._validate(response=response, params=params)
 
     def get_profile(self, token: str):
         """
@@ -238,7 +238,7 @@ class MaestrelloUser(MaestrelloBasic):
         }
 
         response = requests.get(url=api_url, headers=self.headers, params=params)
-        return self.__validate(response=response, params=params)
+        return self._validate(response=response, params=params)
 
     def get_token(self, login: str, password: str):
         """
@@ -295,7 +295,7 @@ class MaestrelloUser(MaestrelloBasic):
         }
 
         response = requests.get(url=api_url, headers=self.headers, params=params)
-        return self.__validate(response=response, params=params)
+        return self._validate(response=response, params=params)
 
     def pass_recovery_link_request(self, login: str):
         """
@@ -330,7 +330,7 @@ class MaestrelloUser(MaestrelloBasic):
         }
 
         response = requests.get(url=api_url, headers=self.headers, params=params)
-        return self.__validate(response=response, params=params)
+        return self._validate(response=response, params=params)
 
     def registration(self, firstname: str, lastname: str, email: str, phone: str):
         """
@@ -378,7 +378,7 @@ class MaestrelloUser(MaestrelloBasic):
         }
 
         response = requests.post(url=api_url, headers=self.headers, json=data)
-        return self.__validate(response=response, params=data)
+        return self._validate(response=response, params=data)
 
     def registration_guest(self, order_id: int):
         """
@@ -405,7 +405,7 @@ class MaestrelloUser(MaestrelloBasic):
         }
 
         response = requests.get(url=api_url, headers=self.headers, params=params)
-        return self.__validate(response=response, params=params)
+        return self._validate(response=response, params=params)
 
     def update_address(self, token: str, address_id: int, city: str = "",
                        street: str = "", house_number: str = "", flat: str = "",
@@ -458,7 +458,7 @@ class MaestrelloUser(MaestrelloBasic):
                 break
 
         response = requests.post(url=api_url, headers=self.headers, params=params, json=data)
-        return self.__validate(response=response, params={"params": params, "json": data})
+        return self._validate(response=response, params={"params": params, "json": data})
 
     def update_email(self, token: str, email: str, ext: str = "", status: str = None):
         """
@@ -499,7 +499,7 @@ class MaestrelloUser(MaestrelloBasic):
         ]
 
         response = requests.post(url=api_url, headers=self.headers, params=params, json=data)
-        return self.__validate(response=response, params={"params": params, "json": data})
+        return self._validate(response=response, params={"params": params, "json": data})
 
     def update_name(self, token: str, firstname: str, lastname: str):
         """
@@ -533,7 +533,7 @@ class MaestrelloUser(MaestrelloBasic):
         data["name"] = f'{firstname} {lastname}'
 
         response = requests.post(url=api_url, headers=self.headers, params=params, json=data)
-        return self.__validate(response=response, params={"params": params, "json": data})
+        return self._validate(response=response, params={"params": params, "json": data})
 
     def update_phone(self, token: str, phone: str, ext: str = "", status: str = None):
         """
@@ -574,5 +574,125 @@ class MaestrelloUser(MaestrelloBasic):
         ]
 
         response = requests.post(url=api_url, headers=self.headers, params=params, json=data)
-        return self.__validate(response=response, params={"params": params, "json": data})
+        return self._validate(response=response, params={"params": params, "json": data})
 
+
+if __name__ == "__main__":
+
+    def show_title(text):
+        print(f"\n\n{text}\n")
+
+    mt_user = MaestrelloUser()
+
+    login = "vlad2010-1996@mail.ru"
+    password = "-7b8Ouisb!j"
+
+    # Получить токен пользователя
+    show_title("Получить токен пользователя")
+    token = mt_user.get_token(login, password)
+    print("Токен", token)
+
+    # Регистрация пользователя
+    # show_title("Регистрация пользователя")
+    # new_user = mt_user.registration(
+    #     firstname="Иван",
+    #     lastname="Петров",
+    #     email=login,
+    #     phone="89876543210"
+    # )
+    # print("Новый пользователь", new_user)
+
+    # Регистрация пользователя по номеру заказа
+    # show_title("Регистрация пользователя по номеру заказа")
+    # new_user = mt_user.registration_guest(
+    #     order_id=1345679
+    # )
+    # print("Новый пользователь", new_user)
+
+    # Авторизация пользователя
+    show_title("Авторизация пользователя")
+    auth_user = mt_user.auth(
+        login=login,
+        password=password
+    )
+    print("Авторизованный пользователь", auth_user)
+
+    # Восстановление пароля, стадия запроса ссылки
+    # show_title("Восстановление пароля, стадия запроса ссылки")
+    # pass_recovery = mt_user.pass_recovery_link_request(
+    #     login=login,
+    # )
+    # print("Результат", pass_recovery)
+
+    # Восстановление пароля, стадия генерации нового пароля
+    # show_title("Восстановление пароля, стадия генерации нового пароля")
+    # pass_recovery = mt_user.pass_recovery_new_pass(
+    #     login=login,
+    #     token=token
+    # )
+    # print("Результат", pass_recovery)
+
+    # Получить данные профиля пользователя
+    show_title("Получить данные профиля пользователя")
+    profile = mt_user.get_profile(
+        token=token
+    )
+    print("Профиль пользователя - ", profile)
+
+    # Изменить имя пользователя
+    # show_title("Изменить имя пользователя")
+    # profile = mt_user.update_name(
+    #     token=token,
+    #     firstname="Сергей",
+    #     lastname="Иванов"
+    # )
+    # print("Обновленный профиль - ", profile)
+
+    # Изменить почту пользователя
+    # show_title("Изменить почту пользователя")
+    # profile = mt_user.update_email(
+    #     token=token,
+    #     email="vlad2010-1996@mail.ru"
+    # )
+    # print("Обновленный профиль - ", profile)
+
+    # Изменить номер телефона пользователя
+    # show_title("Изменить номер телефона пользователя")
+    # profile = mt_user.update_phone(
+    #     token=token,
+    #     phone="81234567890"
+    # )
+    # print("Обновленный профиль - ", profile)
+
+    # Добавить адрес доставки в профиль пользователя
+    # show_title("Добавить адрес доставки в профиль пользователя")
+    # addresses = mt_user.add_address(
+    #     token=token,
+    #     city="Краснодар",
+    #     street="Красная",
+    #     house_number="176/1",
+    # )
+    # print("Адреса пользователя - ", addresses)
+
+    # Изменить адрес доставки в профиле пользователя
+    # show_title("Изменить адрес доставки в профиле пользователя")
+    # addresses = mt_user.update_address(
+    #     token=token,
+    #     address_id=1,
+    #     city="Москва",
+    #     street="Арбат",
+    #     house_number="15",
+    #     flat="143",
+    #     entrance="2",
+    #     region="Московская обл.",
+    #     country="russia",
+    # )
+    # print("Адреса пользователя - ", addresses)
+
+    # Удалить адрес доставки в профиле пользователя
+    # show_title("Удалить адрес доставки в профиле пользователя")
+    # addresses = mt_user.delete_address(
+    #     token=token,
+    #     address_id=0,
+    # )
+    # print("Адреса пользователя - ", addresses)
