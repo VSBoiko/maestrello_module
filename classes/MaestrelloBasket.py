@@ -1,7 +1,5 @@
 from copy import deepcopy
 
-import requests
-
 from classes.MaestrelloBasic import MaestrelloBasic
 
 
