@@ -324,6 +324,19 @@ class MaestrelloCatalog (MaestrelloBasic):
         else:
             return []
 
+    def get_product_sku_id(self, product_id: int):
+        """
+        Получить ID товарного предложения (SKU) по ID товара
+
+        :param product_id: ID товара
+
+        :return:
+        SKU ID (например, 241) или None
+        """
+
+        prod = self.get_product(product_id)
+        return int(prod["sku_id"]) if "sku_id" in prod else None
+
     def get_mods(self, product_type_id: int):
         """
         Получить список модификаторов (дополнений) к типу товаров
@@ -590,3 +603,9 @@ if __name__ == "__main__":
     print(f"Модификаторы для типа (ID = {prod_type_id}) продуктов")
     for mod in prod_type_mods:
         print(mod["id"], mod["name"])
+
+    # Получить SKU ID по ID товара
+    show_title("Получить SKU ID по ID товара")
+    product_id = 2
+    prod_sku_id = mt_catalog.get_product_sku_id(product_id)
+    print(f"Товар (ID = {product_id}) имеет SKU ID {prod_sku_id}")
