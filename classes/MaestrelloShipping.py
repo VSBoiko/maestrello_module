@@ -20,7 +20,7 @@ class MaestrelloShipping (MaestrelloBasic):
         {
             "contact_id": "21266",
             "comment": "TEST TEST TEST TEST",
-            "shipping": "300.0000",
+            "shipping": "300.0000",             (можно не передавать)
             "params": {
                 "payment_id": "13",
                 "payment_params_change": "3333",
@@ -53,6 +53,7 @@ class MaestrelloShipping (MaestrelloBasic):
             ]
         }
         """
+        pass
 
     def create_shipping_address(self, city: str = "", street: str = "", house_number: str = "",
                                 flat: str = "", entrance: str = "", region: str = "",
@@ -70,3 +71,25 @@ class MaestrelloShipping (MaestrelloBasic):
         }
 
         return address
+
+
+if __name__ == "__main__":
+    def show_title(text):
+        print(f"\n\n{text}\n")
+
+    mt_shipping = MaestrelloShipping()
+
+    # Составить словарь с адресом для заказа
+    show_title("Составить словарь с адресом для заказа")
+    ad = mt_shipping.create_shipping_address(
+        city="Краснодар",
+        street="Красная",
+        house_number="197/1",
+        flat="203",
+        entrance="1",
+        region="23",
+        country="rus",
+        floor="16",
+        intercom_code="B203",
+    )
+    print(ad)
