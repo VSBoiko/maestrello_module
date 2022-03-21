@@ -1,6 +1,9 @@
 import requests
 
 from classes.MaestrelloBasic import MaestrelloBasic
+from classes.MaestrelloShipping import MaestrelloShipping
+from classes.MaestrelloBasket import MaestrelloBasket
+from classes.MaestrelloUser import MaestrelloUser
 
 
 class MaestrelloOrder (MaestrelloBasic):
@@ -12,8 +15,7 @@ class MaestrelloOrder (MaestrelloBasic):
         self.__all_shipments = setts["shipping"] if "shipping" in setts else []
 
     def create_order_by_user(self, token: str, user_id: int, basket: list,
-                             payment_id: int, shipping_id: int, shipping_address = dict,
-                             person_count: int = 1, change_with: int = 0, comment: str = ""):
+                             order_params: dict, comment: str = ""):
         """
         Создание заказа для зарегистрированного пользователя
 
@@ -58,7 +60,11 @@ class MaestrelloOrder (MaestrelloBasic):
             ]
         }
 
-        :param token: токен пользователя для работы с API (см. MaestrelloUser.get_token())
+        :param token: токен пользователя для работы с API (использовать MaestrelloUser.get_token())
+        :param user_id: ID пользователя
+        :param basket: корзина (передать результат из MaestrelloBasket.get_basket_for_order())
+        :param order_params: параметры заказа (передать результат из MaestrelloBasket.create_order_params())
+        :param (не обязаельный) comment: комментарий к заказу
 
         :return:
         {
@@ -76,33 +82,17 @@ class MaestrelloOrder (MaestrelloBasic):
         data = {
             "contact_id": str(user_id),
             "comment": comment,
-            "params": {
-                "payment_id": str(payment_id),
-                "restaurant_id": "",                        # id ресторана, его можно не передавать
-                "payment_params_change": str(change_with),  # с какой суммы нужна сдача
-                "shipping_id": str(shipping_id),
-
-                # реализовать работу со временем через MaestrelloShipping
-                "shipping_params_desired_delivery_variant": "Ближайшее время",
-                # если выбрать Дата и время, нужно передать еще дату и интервал
-                # "shipping_params_desired_delivery_variant": "Дата и время",
-                # "shipping_params_desired_delivery.date": "2021-07-13",
-                # "shipping_params_desired_delivery.interval": "12:00-12:30",
-
-                "shipping_params_person_count": str(person_count)
-            },
-            "items": basket
+            "items": basket,
+            "params": {},
         }
-
-        data["params"].update(shipping_address)
+        data["params"].update(order_params)
 
         response = requests.get(url=api_url, headers=self.headers, params=params, json=data)
         return self._validate(response=response, params=(params, data))
 
     def create_order_by_guest(self, token: str, user_name: str, user_phone: str,
-                              user_email: str, basket: list, payment_id: int,
-                              shipping_id: int, shipping_address = dict, person_count: int = 1,
-                              change_with: int = 0, comment: str = ""):
+                              user_email: str, basket: list, order_params: dict,
+                              comment: str = ""):
         """
         Создание заказа для гостя (незарегестрированного пользователя)
 
@@ -152,7 +142,17 @@ class MaestrelloOrder (MaestrelloBasic):
             ]
         }
 
-        :param token: токен пользователя для работы с API (см. MaestrelloUser.get_token())
+        :param token: токен пользователя для работы с API (можно
+            использовать MaestrelloUser.get_token())
+        :param user_name: ФИО пользователя
+        :param user_phone: номер телефона пользователя
+        :param user_email: e-mail пользователя
+        :param basket: корзина (передать результат
+            из MaestrelloBasket.get_basket_for_order())
+        :param order_params: параметры заказа (передать результат
+            из MaestrelloBasket.create_order_params())
+        :param (не обязаельный) comment: комментарий к заказу
+
 
         :return:
         {
@@ -174,29 +174,68 @@ class MaestrelloOrder (MaestrelloBasic):
                 "email": user_email
             },
             "comment": comment,
-            # "coupon_code": "QJX4A30B",
-            "params": {
-                "payment_id": str(payment_id),
-                "restaurant_id": "",                        # id ресторана, его можно не передавать
-                "payment_params_change": str(change_with),  # с какой суммы нужна сдача
-                "shipping_id": str(shipping_id),
-
-                # реализовать работу со временем через MaestrelloShipping
-                "shipping_params_desired_delivery_variant": "Ближайшее время",
-                # если выбрать Дата и время, нужно передать еще дату и интервал
-                # "shipping_params_desired_delivery_variant": "Дата и время",
-                # "shipping_params_desired_delivery.date": "2021-07-13",
-                # "shipping_params_desired_delivery.interval": "12:00-12:30",
-
-                "shipping_params_person_count": str(person_count)
-            },
-            "items": basket
+            "items": basket,
+            "params": {},
+            # "coupon_code": "QJX4A30B",            # так применяется купон
         }
 
-        data["params"].update(shipping_address)
+        data["params"].update(order_params)
 
         response = requests.get(url=api_url, headers=self.headers, params=params, json=data)
         return self._validate(response=response, params=(params, data))
+
+    def create_order_params(self, payment_id: int, shipping_id: int, shipping_address: dict,
+                            person_count: int = 1, change_with: int = 0):
+        """
+        Создать словарь с параметрами для создания заказа
+
+        :param payment_id: ID способа оплаты
+        :param shipping_id: ID способа доставки
+        :param shipping_address: словарь с данными для доставки (передать результат
+            из MaestrelloShipping.create_shipping_address())
+        :param (не обязательный) person_count: количество приборов для еды
+        :param (не обязательный) change_with: с какой суммы подготовить сдачу
+
+        :return:
+        {
+            "payment_id": "1",
+            "restaurant_id": "1",
+            "payment_params_change": "3333",
+            "shipping_address.city": "Москва",
+            "shipping_address.country": "rus",
+            "shipping_address.dom": "31",
+            "shipping_address.etazh": "3",
+            "shipping_address.kod-domofona": "3",
+            "shipping_address.kvartira": "3",
+            "shipping_address.podezd": "3",
+            "shipping_address.region": "77",
+            "shipping_address.street": "Ос",
+            "shipping_id": "37",
+            //"shipping_params_desired_delivery_variant": "Ближайшее время",
+                // если выбрать Дата и время, нужно передать еще дату и интервал
+            "shipping_params_desired_delivery_variant": "Дата и время",
+            "shipping_params_desired_delivery.date": "2021-07-13",
+            //"shipping_params_desired_delivery.interval": "12:00-12:30",
+            "shipping_params_person_count": "5"
+        }
+        """
+
+        data = {
+            "payment_id": str(payment_id),
+            "restaurant_id": "",  # id ресторана, его можно не передавать
+            "payment_params_change": str(change_with),  # с какой суммы нужна сдача
+            "shipping_id": str(shipping_id),
+            "shipping_params_person_count": str(person_count),
+
+            # реализовать работу со временем через MaestrelloShipping
+            "shipping_params_desired_delivery_variant": "Ближайшее время",
+            # если выбрать Дата и время, нужно передать еще дату и интервал
+            # "shipping_params_desired_delivery_variant": "Дата и время",
+            # "shipping_params_desired_delivery.date": "2021-07-13",
+            # "shipping_params_desired_delivery.interval": "12:00-12:30",
+        }
+        data.update(shipping_address)
+        return data
 
     def get_all_payments(self):
         """
@@ -442,7 +481,7 @@ class MaestrelloOrder (MaestrelloBasic):
         response = requests.get(url=api_url, headers=self.headers, params=params)
         return self._validate(response=response, params=params)
 
-    def get_orders(self, token, limit: int = 0):
+    def get_orders(self, token, limit: int = 1000):
         """
         Массив заказов покупателя
 
@@ -713,3 +752,103 @@ class MaestrelloOrder (MaestrelloBasic):
         api_url = f'{self.api}order-settings'
         response = requests.get(url=api_url, headers=self.headers)
         return self._validate(response=response, params=None)
+
+
+if __name__ == "__main__":
+    def show_title(text):
+        print(f"\n\n{text}\n")
+
+    mt_order = MaestrelloOrder()
+
+    # Получить все способы оплаты
+    show_title("Все способы оплаты")
+    print(mt_order.get_all_payments())
+
+    # Получить все способы доставки
+    show_title("Все способы доставки")
+    print(mt_order.get_all_shipments())
+
+    # Получить все возможные статусы заказа
+    show_title("Все возможные статусы заказа")
+    print(mt_order.get_all_statuses())
+
+    # Создать заказ
+    show_title("Создать заказ")
+
+    mt_user = MaestrelloUser()
+    login = "vlad2010-1996@mail.ru"
+    password = "-7b8Ouisb!j"
+
+    token = mt_user.get_token(
+        login=login,
+        password=password
+    )
+    print("Токен", token)
+
+    auth_user = mt_user.auth(
+        login=login,
+        password=password
+    )
+    print("Авторизованный пользователь", auth_user)
+
+    mt_shipping = MaestrelloShipping()
+    ad = mt_shipping.create_shipping_address(
+        city="Краснодар",
+        street="Красная",
+        house_number="197/1",
+        flat="203",
+        entrance="1",
+        region="23",
+        country="rus",
+        floor="16",
+        intercom_code="B203",
+    )
+
+    params = mt_order.create_order_params(
+        payment_id=1,
+        shipping_id=11,
+        shipping_address=ad,
+        person_count=2,
+        change_with=5000,
+    )
+    print("Параметры заказа:", params)
+
+    mt_basket = MaestrelloBasket()
+    mt_basket.add_product(21, 7)
+    mt_basket.add_product(25, 10)
+    # mt_basket.add_product_mod(21, 17)
+    # mt_basket.add_product_mod(21, 18)
+    # mt_basket.add_product_mod(25, 19)
+
+    basket = mt_basket.get_basket_for_order()
+    print("Корзина:", basket)
+
+    # new_order = mt_order.create_order_by_user(
+    #    token=token,
+    #    user_id=auth_user["id"],
+    #    basket=basket,
+    #    order_params=params,
+    #    comment="Тестовый заказ, не принимайте"
+    # )
+    # print("Новый заказ:", new_order)
+
+    # Получить заказ по ID
+    show_title("Получить заказ по его ID")
+    print(mt_order.get_order(
+        token=token,
+        order_id=40457
+    ))
+
+    # Получить заказ по ID
+    show_title("Получить все заказы пользователя")
+    print(mt_order.get_orders(
+        token=token,
+    ))
+
+    # Получить статус заказа по ID
+    show_title("Получить статус заказа по ID")
+    print(mt_order.get_order_status(
+        token=token,
+        order_id=40458
+    ))
+
